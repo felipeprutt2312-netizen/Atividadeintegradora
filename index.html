@@ -9,6 +9,7 @@
         .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         button { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
         textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+        input[type="password"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         #output { margin-top: 15px; padding: 10px; background: #e9ecef; border-left: 4px solid #007bff; min-height: 40px; }
     </style>
 </head>
@@ -16,6 +17,10 @@
 
 <div class="container">
     <h2>Pergunte ao Gemini</h2>
+    
+    <!-- Campo seguro para inserir a API Key direto na página -->
+    <input type="password" id="apiKeyInput" placeholder="Cole sua API Key do Gemini aqui...">
+    
     <textarea id="promptInput" placeholder="Digite seu prompt aqui..."></textarea>
     <button onclick="enviarPrompt()">Enviar para o Gemini</button>
     
@@ -24,11 +29,18 @@
 </div>
 
 <script>
-    // Função limpa (Clean Code) com responsabilidade única de validar e enviar
+    // Função com responsabilidade única de validar e processar a requisição
     async function enviarPrompt() {
+        const apiKey = document.getElementById('apiKeyInput').value;
         const prompt = document.getElementById('promptInput').value;
         const outputDiv = document.getElementById('output');
         
+        // Cláusulas de guarda para validação (Clean Code)
+        if (!apiKey || !apiKey.trim()) {
+            outputDiv.innerText = "Erro: Por favor, insira sua API Key.";
+            return;
+        }
+
         if (!prompt || !prompt.trim()) {
             outputDiv.innerText = "Erro: O prompt não pode estar vazio.";
             return;
@@ -36,8 +48,6 @@
 
         outputDiv.innerText = "Pensando...";
 
-        // Substitua pela sua chave ou configure uma forma segura de input
-        const apiKey = "SUA_API_KEY_AQUI"; 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
         try {
@@ -48,6 +58,12 @@
             });
 
             const data = await response.json();
+            
+            if (data.error) {
+                outputDiv.innerText = `Erro na API: ${data.error.message}`;
+                return;
+            }
+
             const textoResposta = data.candidates[0].content.parts[0].text;
             outputDiv.innerText = textoResposta;
         } catch (error) {
