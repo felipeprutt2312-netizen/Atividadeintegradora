@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integração Gemini</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f4f4f9; }
+        .container { max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+        #output { margin-top: 15px; padding: 10px; background: #e9ecef; border-left: 4px solid #007bff; min-height: 40px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Pergunte ao Gemini</h2>
+    <textarea id="promptInput" placeholder="Digite seu prompt aqui..."></textarea>
+    <button onclick="enviarPrompt()">Enviar para o Gemini</button>
+    
+    <h3>Resposta:</h3>
+    <div id="output">Aguardando comando...</div>
+</div>
+
+<script>
+    // Função limpa (Clean Code) com responsabilidade única de validar e enviar
+    async function enviarPrompt() {
+        const prompt = document.getElementById('promptInput').value;
+        const outputDiv = document.getElementById('output');
+        
+        if (!prompt || !prompt.trim()) {
+            outputDiv.innerText = "Erro: O prompt não pode estar vazio.";
+            return;
+        }
+
+        outputDiv.innerText = "Pensando...";
+
+        // Substitua pela sua chave ou configure uma forma segura de input
+        const apiKey = "SUA_API_KEY_AQUI"; 
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+
+            const data = await response.json();
+            const textoResposta = data.candidates[0].content.parts[0].text;
+            outputDiv.innerText = textoResposta;
+        } catch (error) {
+            outputDiv.innerText = "Erro ao se comunicar com a API.";
+        }
+    }
+</script>
+
+</body>
+</html>
